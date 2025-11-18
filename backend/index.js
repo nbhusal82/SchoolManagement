@@ -1,25 +1,16 @@
 import express from "express"
 import dotenv from "dotenv"
 import db from "./config/dbconn.js";
+import router from "./routes/auth.routes.js";
+
 
 
 dotenv.config();
 const app=express();
 const port =process.env.port
 //api ko path dine..
-app.get("/api/school/users", (req, res) => {
 
-    res.json({
-        message: "welcome i am user",
-        status: "success",
-        users: [
-            { id: 1, name: "Nabin" },
-            { id: 2, name: "Ram" }
-        ]
-    });
-    
-});
-
+app.use("/api/school",router)
 
 try {
     await db.connect();
