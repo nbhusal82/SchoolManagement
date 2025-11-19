@@ -7,6 +7,10 @@ import router from "./routes/auth.routes.js";
 
 dotenv.config();
 const app=express();
+
+// to parse JSON request body (data aune user bbhata).
+app.use(express.json()); 
+
 const port =process.env.port
 //api ko path dine..
 
