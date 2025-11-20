@@ -1,15 +1,14 @@
-import express from "express"
-import {  login, test  } from "../controller/auth.controller.js" 
+import express from "express";
+import { login, signout, test } from "../controller/auth.controller.js";
+import { islogin } from "../middlewares/islogin.js";
 
+const router = express.Router();
 
-const router=express.Router();
+router.get("/users", islogin, test);
+router.post("/login", login);
+router.post("/signout", signout);
 
-router.get("/users",test);
-router.post("/user",login);
-
-// router.get("/hey",test1 );
+// router.get("/hey",test1 );g
 
 // router.get("/is",add);
 export default router;
-
-
