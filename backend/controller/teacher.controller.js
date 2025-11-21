@@ -1,0 +1,63 @@
+import db from "../config/dbconn.js";
+
+export const addteacher = async (req, res) => {
+  try {
+    const { name, email, position, phone } = req.body;
+    if (!name || !email || !position || !phone) {
+      return res.status(400).json({
+        message: "All Fileds are Required",
+      });
+    }
+    const [oldemail] = await db.execute(
+      "select id from teachers where email=?",
+      [email]
+    );
+    if (oldemail.length > 0) {
+      return res.status(409).json({
+        message: "Email already exists .Use another eamil",
+      });
+    }
+
+    // data halne database ma..
+    await db.execute(
+      "Insert into teachers(name,email,position,phone) values(?,?,?,?)",
+      [name, email, position, phone]
+    );
+
+    return res.status(201).json({
+      message: "teacher add sucessfully",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const getteacher = async (req, res) => {
+  try {
+    const [allteacher] = await db.execute("select * from teachers ");
+    res.status(200).json({
+      message: "your data",
+      data: allteacher,
+    });
+  } catch (error) {}
+};
+
+export const deleteTeacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [checkout] = await db.execute("select id from teachers where id=?", [
+      id,
+    ]);
+    if (checkout.length === 0) {
+      return res.status(404).json({
+        message: "teacher not found",
+        message: `teacher not found with this ${id}`,
+      });
+    }
+    await db.execute("DELETE from teachers where id=?", [id]);
+    return res.status(200).json({
+      message: `teacher deleted suceessfully with id ${id}`,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

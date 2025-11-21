@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import db from "./config/dbconn.js";
 import router from "./routes/auth.routes.js";
 import cookie from "cookie-parser";
+import teacher_router from "./routes/teacher.routes.js";
 
 dotenv.config();
 const app = express();
@@ -13,7 +14,8 @@ app.use(express.json());
 const port = process.env.port;
 //api ko path dine..
 
-app.use("/api/school", router);
+app.use("/api/auth", router);
+app.use("/api/teacher", teacher_router);
 
 try {
   await db.connect();

@@ -1,4 +1,5 @@
 // get me
+import jwt from "jsonwebtoken";
 export const islogin = async (req, res, next) => {
   try {
     const token = req.cookies.token;
@@ -7,7 +8,13 @@ export const islogin = async (req, res, next) => {
         message: "hey hacker login ",
       });
     }
-    next();
-  } catch (error) {}
-};
 
+    const decoded = jwt.verify(token, process.env.Secret_key);
+    // console.log(decoded);
+    req.user=decoded;
+    
+    next();
+  } catch (error) {
+    console.log(error);
+  }
+};
