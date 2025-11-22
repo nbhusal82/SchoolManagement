@@ -91,3 +91,5 @@ export const signout = async (req, res) => {
     console.log(error);
   }
 };
+//make api for register
+
