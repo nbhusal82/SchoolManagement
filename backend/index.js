@@ -4,6 +4,7 @@ import db from "./config/dbconn.js";
 import router from "./routes/auth.routes.js";
 import cookie from "cookie-parser";
 import teacher_router from "./routes/teacher.routes.js";
+import vacancyroutes from "./routes/vacancy.routes.js";
 
 dotenv.config();
 const app = express();
@@ -16,6 +17,7 @@ const port = process.env.port;
 
 app.use("/api/auth", router);
 app.use("/api/teacher", teacher_router);
+app.use("/api/vacancy", vacancyroutes);
 
 try {
   await db.connect();

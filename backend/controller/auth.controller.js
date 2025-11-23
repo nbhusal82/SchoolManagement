@@ -75,7 +75,6 @@ export const login = async (req, res) => {
       //   token: token,
       // },
     });
-
   } catch (error) {
     console.log(error);
   }
@@ -91,5 +90,3 @@ export const signout = async (req, res) => {
     console.log(error);
   }
 };
-//make api for register
-

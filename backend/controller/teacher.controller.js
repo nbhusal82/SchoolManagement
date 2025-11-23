@@ -61,3 +61,45 @@ export const deleteTeacher = async (req, res) => {
     console.log(error);
   }
 };
+export const updateteacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, position, phone } = req.body;
+    //1. check if teacher exists.
+    const [teacher] = await db.execute("select * from teachers where id=?", [
+      id,
+    ]);
+    if (teacher.length === 0) {
+      return res.status(404).json({
+        message: "Teacher not found",
+      });
+    }
+    const [emailteacher] = await db.execute(
+      "select email from teachers where email=?",
+      [email]
+    );
+    if (emailteacher.length > 0) {
+      return res.status(404).json({
+        message: "email already exit",
+      });
+    }
+
+    const oldteacher = teacher[0];
+
+    await db.execute(
+      "UPDATE teachers SET name=?,email=?, phone=?,position=? WHERE id =?",
+      [
+        name ?? oldteacher.name,
+        email ?? oldteacher.email,
+        phone ?? oldteacher.phone,
+        position ?? oldteacher.position,
+        id,
+      ]
+    );
+    res.status(200).json({
+      message: "teacher updated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

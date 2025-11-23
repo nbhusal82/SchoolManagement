@@ -5,14 +5,14 @@ export const islogin = async (req, res, next) => {
     const token = req.cookies.token;
     if (!token) {
       res.status(401).json({
-        message: "hey hacker login ",
+        message: "you must be login ",
       });
     }
 
     const decoded = jwt.verify(token, process.env.Secret_key);
     // console.log(decoded);
-    req.user=decoded;
-    
+    req.user = decoded;
+
     next();
   } catch (error) {
     console.log(error);

@@ -13,3 +13,11 @@ CREATE TABLE users (
     phone VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
        );
+
+    create TABLE vacancy(
+      id int AUTO_INCREMENT PRIMARY KEY,
+      position VARCHAR(100) NOT NULL,
+      description TEXT NOT NULL,
+      dealine VARCHAR(100) NOT Null,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )   
