@@ -1,6 +1,6 @@
 import db from "../config/dbconn.js";
 
-export const addvacancy = async (req, res) => {
+export const addvacancy = async (req, res,next) => {
   try {
     const { position, description, deadline } = req.body;
     if (!position || !description || !deadline) {
@@ -16,11 +16,11 @@ export const addvacancy = async (req, res) => {
       Message: "Vacancy add",
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
-export const getvacancy = async (req, res) => {
+export const getvacancy = async (req, res,next) => {
   try {
     const [allteacher] = await db.execute("select * from vacancy ");
     res.status(200).json({
@@ -28,13 +28,13 @@ export const getvacancy = async (req, res) => {
       data: allteacher,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
 
 
-export const deletevacancy=async(req,res)=>{
+export const deletevacancy=async(req,res,next)=>{
     try {
         const { id } = req.params;
     const [checkout] = await db.execute("select id from vacancy where id=?", [
@@ -52,6 +52,6 @@ if (checkout.length === 0) {
     });
         
     } catch (error) {
-        
+     next(error);   
     }
 }

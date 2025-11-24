@@ -1,6 +1,6 @@
 import db from "../config/dbconn.js";
 
-export const addteacher = async (req, res) => {
+export const addteacher = async (req, res,next) => {
   try {
     const { name, email, position, phone } = req.body;
     if (!name || !email || !position || !phone) {
@@ -28,20 +28,22 @@ export const addteacher = async (req, res) => {
       message: "teacher add sucessfully",
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
-export const getteacher = async (req, res) => {
+export const getteacher = async (req, res,next) => {
   try {
     const [allteacher] = await db.execute("select * from teachers ");
     res.status(200).json({
       message: "your data",
       data: allteacher,
     });
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const deleteTeacher = async (req, res) => {
+export const deleteTeacher = async (req, res,next) => {
   try {
     const { id } = req.params;
     const [checkout] = await db.execute("select id from teachers where id=?", [
@@ -58,10 +60,10 @@ export const deleteTeacher = async (req, res) => {
       message: `teacher deleted suceessfully with id ${id}`,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
-export const updateteacher = async (req, res) => {
+export const updateteacher = async (req, res,next) => {
   try {
     const { id } = req.params;
     const { name, email, position, phone } = req.body;
@@ -100,6 +102,6 @@ export const updateteacher = async (req, res) => {
       message: "teacher updated successfully",
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };

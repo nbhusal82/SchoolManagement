@@ -5,21 +5,22 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const test = async (req, res) => {
+export const test = async (req, res, next) => {
   try {
     const [users] = await db.execute("select * from users");
     res.status(200).json({
       data: users,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 // login api
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
     //1. get mail and password from users side
     const { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).json({
         message: "invaild email & password",
@@ -30,21 +31,20 @@ export const login = async (req, res) => {
     const [result] = await db.execute("select * from users where email=? ", [
       email,
     ]);
-
     const user = result[0];
-
+        // users found garne?
+    if (result.length === 0) {
+      return res.status(400).json({
+        message: "Invaild Credenntials",
+      });
+    }
     // check garne becrpyt bhata        //users ko passs ra database ko pass..
     const isMatch = await bcryptjs.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({ message: "invalid credenntials" });
     }
-    // users found garne?
-    if (result.length === 0) {
-      return res.status(400).json({
-        message: "Invaild Credenntials",
-      });
-    }
+
 
     // jsonwebtoken
     const token = await jweb.sign(
@@ -76,17 +76,17 @@ export const login = async (req, res) => {
       // },
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
-export const signout = async (req, res) => {
+export const signout = async (req, res, next) => {
   try {
     res.clearCookie("token");
     res.status(200).json({
       message: "logout success",
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
