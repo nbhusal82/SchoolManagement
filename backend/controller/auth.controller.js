@@ -23,7 +23,7 @@ export const login = async (req, res, next) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        message: "invaild email & password",
+        Message: "invaild email & password",
       });
     }
 
@@ -32,10 +32,10 @@ export const login = async (req, res, next) => {
       email,
     ]);
     const user = result[0];
-        // users found garne?
+    // users found garne?
     if (result.length === 0) {
       return res.status(400).json({
-        message: "Invaild Credenntials",
+        Message: "Invaild Credenntials",
       });
     }
     // check garne becrpyt bhata        //users ko passs ra database ko pass..
@@ -44,7 +44,6 @@ export const login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(400).json({ message: "invalid credenntials" });
     }
-
 
     // jsonwebtoken
     const token = await jweb.sign(
