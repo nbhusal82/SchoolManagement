@@ -1,30 +1,43 @@
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/features/authstate";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
- 
+import { Link, useNavigate } from "react-router-dom";
 
 export const Dashboard = () => {
-  const {email,isAuth} =useSelector((state)=>state.user);
-  const dispatch=useDispatch();
-  const navigate=useNavigate();
-  useEffect(()=> {
-    if(!isAuth){
+  const { email, isAuth } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isAuth) {
       navigate("/notfound");
     }
-  },[isAuth]);
-  const handleLogout=()=>{
+  }, [isAuth]);
+  const handleLogout = () => {
     dispatch(logout());
   };
-  return ( 
-    <div className='h-screen flex justify-center'>
-        <h1 className='font-bold text-3xl'>Hello  Admin Nabin Bhusal</h1>
-        <p className="mt-5 text-5xl" >Welcome:{email}</p>
-        
-<button onClick={handleLogout} className= "text-4xl text-red-700 ">
-          Logout
-        </button>
+  return (
+    <div className="h-screen flex">
+      <div className="bg-blue-950 pt-3">
+        <Link to="/dashboard/teacher" className="text-white text-xl p-1 bg-amber-200 m-2 rounded-md"> Add Teacher</Link>
+      </div>
+      <div className="flex flex-col mx-auto justify-center">
+        <div>
+          <h1 className="font-bold text-3xl   mx-auto">
+            Hello Admin Nabin Bhusal
+          </h1>
+        </div>
+
+        <div className="  flex flex-col mx-auto justify-center">
+          <p className="text-xl">Welcome:{email}</p>
+
+          <button
+            onClick={handleLogout}
+            className=" mt-4 text-4xl text-red-700 "
+          >
+            Logout
+          </button>
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
