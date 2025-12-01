@@ -65,14 +65,13 @@ const Teacherdash = () => {
                 <td className="px-6 py-4 text-sm text-gray-700">
                   <div className="space-x-3">
                     <button
-                      className=" bg-red-500 m-2 rounded-md cursor-pointer underline"
+                      className=" bg-red-500 m-2 rounded-md cursor-pointer underline font-bold"
                       onClick={Handledelete}
                     >
                       Delete
                     </button>
                     <button
-                      className=" bg-green-600 m-2 rounded-md cursor-pointer under
-                      "
+                      className=" bg-green-600 m-2 rounded-md cursor-pointer underline"
                       onClick={handleEdit}
                     >
                       Edit
