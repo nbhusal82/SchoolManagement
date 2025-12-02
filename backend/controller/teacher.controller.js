@@ -1,6 +1,6 @@
 import db from "../config/dbconn.js";
 
-export const addteacher = async (req, res,next) => {
+export const addteacher = async (req, res, next) => {
   try {
     const { name, email, position, phone } = req.body;
     if (!name || !email || !position || !phone) {
@@ -31,7 +31,7 @@ export const addteacher = async (req, res,next) => {
     next(error);
   }
 };
-export const getteacher = async (req, res,next) => {
+export const getteacher = async (req, res, next) => {
   try {
     const [allteacher] = await db.execute("select * from teachers ");
     res.status(200).json({
@@ -43,7 +43,7 @@ export const getteacher = async (req, res,next) => {
   }
 };
 
-export const deleteTeacher = async (req, res,next) => {
+export const deleteTeacher = async (req, res, next) => {
   try {
     const { id } = req.params;
     const [checkout] = await db.execute("select id from teachers where id=?", [
@@ -63,44 +63,49 @@ export const deleteTeacher = async (req, res,next) => {
     next(error);
   }
 };
-export const updateteacher = async (req, res,next) => {
+export const updateteacher = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, email, position, phone } = req.body;
-    //1. check if teacher exists.
-    const [teacher] = await db.execute("select * from teachers where id=?", [
+    const update_data = req.body;
+
+    // 1. Check teacher exists
+    const [teacher] = await db.execute("SELECT * FROM teachers WHERE id=?", [
       id,
     ]);
+
     if (teacher.length === 0) {
-      return res.status(404).json({
-        message: "Teacher not found",
-      });
-    }
-    const [emailteacher] = await db.execute(
-      "select email from teachers where email=?",
-      [email]
-    );
-    if (emailteacher.length > 0) {
-      return res.status(404).json({
-        message: "email already exit",
-      });
+      return res.status(404).json({ message: "Teacher not found" });
     }
 
     const oldteacher = teacher[0];
 
+    // 2. If email changed → check duplicate (ignore current ID)
+    if (update_data.email && update_data.email !== oldteacher.email) {
+      const [emailteacher] = await db.execute(
+        "SELECT email FROM teachers WHERE email=? AND id != ?",
+        [update_data.email, id]
+      );
+
+      if (emailteacher.length > 0) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+    }
+
+    // 3. Safe final data (undefined allowed NO)
+    const finaldata = {
+      name: update_data.name ?? oldteacher.name,
+      email: update_data.email ?? oldteacher.email,
+      phone: update_data.phone ?? oldteacher.phone,
+      position: update_data.position ?? oldteacher.position,
+    };
+
+    // 4. Update SQL
     await db.execute(
-      "UPDATE teachers SET name=?,email=?, phone=?,position=? WHERE id =?",
-      [
-        name ?? oldteacher.name,
-        email ?? oldteacher.email,
-        phone ?? oldteacher.phone,
-        position ?? oldteacher.position,
-        id,
-      ]
+      "UPDATE teachers SET name=?, email=?, phone=?, position=? WHERE id=?",
+      [finaldata.name, finaldata.email, finaldata.phone, finaldata.position, id]
     );
-    res.status(200).json({
-      message: "teacher updated successfully",
-    });
+
+    res.status(200).json({ message: "Teacher updated successfully" });
   } catch (error) {
     next(error);
   }

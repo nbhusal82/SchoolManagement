@@ -1,19 +1,97 @@
+import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { useGetAllTeacherQuery } from "../../../redux/features/teacherApi";
+import {
+  useDeleteTeacherMutation,
+  useGetAllTeacherQuery,
+  useUpdateTeacherMutation,
+} from "../../../redux/features/teacherApi";
 import { Loading } from "../../shared/loading";
+import { Error } from "../../shared/Error";
 
 const Teacherdash = () => {
   const { data, isLoading, error } = useGetAllTeacherQuery();
-  if (isLoading) return <Loading />;
-  if (error) return <p className="p-4 text-red-500">Failed to load teacher</p>;
 
   const teachers = data?.data;
-  const Handledelete = () => {
-    toast.error("hey");
+  const [teacherId, setTeacherId] = useState();
+  const [isMoalOpen, setIsModalOpen] = useState(false);
+  const [deleteTeacher] = useDeleteTeacherMutation();
+  const [updateTeacher] = useUpdateTeacherMutation();
+  const [originalTeacher, setOriginalData] = useState({});
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    position: "",
+    phone: "",
+  });
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
-  const handleEdit = () => {
-    toast.error("edit it");
+
+  const handleEdit = (teacher) => {
+    // setSelectedTeacher(teacher);
+    setTeacherId(teacher.id);
+    setOriginalData(teacher);
+    setFormData({
+      name: teacher.name,
+      email: teacher.email,
+      position: teacher.position,
+      phone: teacher.phone,
+    });
+    setIsModalOpen(true);
   };
+  const Handledelete = async (teacher) => {
+    setTeacherId(teacher.id);
+    // console.log(teacher.id);
+    // toast.error("hey");
+    try {
+      await deleteTeacher(teacherId).unwrap(); // for use state
+      //await deleteTeacher(teacher.id).unwrap(); // for  direct api call.
+      toast.success("teacher deleted succesfully");
+    } catch (error) {
+      toast.error("failed to delete teacher");
+    }
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Find only changed fields
+    const changes = {};
+    for (const key in formData) {
+      if (formData[key] !== originalTeacher[key]) {
+        changes[key] = formData[key];
+      }
+    }
+
+    // If no changes, stop here
+    if (Object.keys(changes).length === 0) {
+      toast.info("No changes to update");
+      return;
+    }
+
+    try {
+      const res = await updateTeacher({
+        id: teacherId,
+        data: changes,
+      }).unwrap();
+      console.log(res);
+      toast.success(res.message || "Teacher updated successfully");
+      setIsModalOpen(false);
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to update teacher");
+    }
+  };
+
+  if (isLoading) {
+    return <Loading isLoading={isLoading} />;
+  }
+  if (error) {
+    return <Error Error={Error} />;
+  }
 
   return (
     <div className="p-6">
@@ -66,13 +144,13 @@ const Teacherdash = () => {
                   <div className="space-x-3">
                     <button
                       className=" bg-red-500 m-2 rounded-md cursor-pointer underline font-bold"
-                      onClick={Handledelete}
+                      onClick={() => Handledelete(teacher)}
                     >
                       Delete
                     </button>
                     <button
                       className=" bg-green-600 m-2 rounded-md cursor-pointer underline"
-                      onClick={handleEdit}
+                      onClick={() => handleEdit(teacher)}
                     >
                       Edit
                     </button>
@@ -87,6 +165,62 @@ const Teacherdash = () => {
           <p className="p-4 text-center text-gray-500">No teacher data found</p>
         )}
       </div>
+      {isMoalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Edit Teacher</h2>
+            <form onSubmit={handleSubmit}>
+              <input
+                value={formData?.name || ""}
+                type="text"
+                id="name"
+                placeholder="Name"
+                className="w-full p-2 border rounded mb-3"
+                onChange={handleChange}
+              />
+              <input
+                value={formData?.email || ""}
+                type="email"
+                id="email"
+                placeholder="Email"
+                className="w-full p-2 border rounded mb-3"
+                onChange={handleChange}
+              />
+              <input
+                value={formData?.position || ""}
+                type="text"
+                id="position"
+                placeholder="Position"
+                className="w-full p-2 border rounded mb-3"
+                onChange={handleChange}
+              />
+              <input
+                value={formData?.phone || ""}
+                type="text"
+                id="phone"
+                placeholder="Phone"
+                className="w-full p-2 border rounded mb-3"
+                onChange={handleChange}
+              />
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  type="button"
+                  className=" cursor-pointer px-4 py-2 bg-gray-300 rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className=" cursor-pointer px-4 py-2 bg-blue-600 text-white rounded"
+                >
+                  Update
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
