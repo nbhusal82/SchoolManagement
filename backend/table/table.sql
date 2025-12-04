@@ -11,6 +11,7 @@ CREATE TABLE users (
     email VARCHAR(150) NOT NULL UNIQUE,
     position VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
+    image VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
        );
 

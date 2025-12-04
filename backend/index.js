@@ -9,15 +9,17 @@ import { errorhandeler } from "./middlewares/errorhandel.js";
 import cors from "cors";
 dotenv.config();
 const app = express();
+
 app.use(cookie());
 // to parse JSON request body (data aune user bbhata).
 app.use(express.json());
-app.use(cors({
-  origin:"http://localhost:5173",
-  credentials:true,
-
-})
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
 );
+app.use("/uploads", express.static("uploads"));
 
 const port = process.env.port;
 //api ko path dine..

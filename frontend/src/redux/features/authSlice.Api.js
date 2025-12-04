@@ -9,6 +9,7 @@ export const authApi = indexSlice.injectEndpoints({
       }),
       providesTags: ["auth"],
     }),
+    
   }),
 });
 export const { useSignoutMutation } = authApi;

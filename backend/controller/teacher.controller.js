@@ -1,10 +1,15 @@
 import db from "../config/dbconn.js";
 
+import { removeimg } from "../utils/removeimg.js";
+
 export const addteacher = async (req, res, next) => {
   try {
     const { name, email, position, phone } = req.body;
     if (!name || !email || !position || !phone) {
-      return res.status(400).json({
+      if (req.file) {
+        removeimg(req.file.path);
+      }
+      res.status(400).json({
         message: "All Fileds are Required",
       });
     }
@@ -13,15 +18,18 @@ export const addteacher = async (req, res, next) => {
       [email]
     );
     if (oldemail.length > 0) {
+      if (req.file) {
+        removeimg(req.file.path);
+      }
       return res.status(409).json({
         message: "Email already exists .Use another eamil",
       });
     }
-
-    // data halne database ma..
+    const image = req.file ? `uploads/teachers/${req.file.filename}` : null;
+    // data halne database ma..filename
     await db.execute(
-      "Insert into teachers(name,email,position,phone) values(?,?,?,?)",
-      [name, email, position, phone]
+      "Insert into teachers(name,email,position,phone,image) values(?,?,?,?,?)",
+      [name, email, position, phone, image]
     );
 
     return res.status(201).json({
