@@ -54,18 +54,25 @@ export const getteacher = async (req, res, next) => {
 export const deleteTeacher = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const [checkout] = await db.execute("select id from teachers where id=?", [
-      id,
-    ]);
-    if (checkout.length === 0) {
+    console.log(id);
+    const [existing] = await db.execute(
+      "select id,image from teachers where id=?",
+      [id]
+    );
+    if (existing.length == 0) {
       return res.status(404).json({
-        message: "teacher not found",
         message: `teacher not found with this ${id}`,
       });
     }
-    await db.execute("DELETE from teachers where id=?", [id]);
+
+    // Delete image if exists
+    if (existing[0].img) {
+      removeImage(`uploads/teachers/${existing[0].img.split("/").pop()}`);
+    }
+
+    await db.execute("delete from teachers where id=?", [id]);
     return res.status(200).json({
-      message: `teacher deleted suceessfully with id ${id}`,
+      message: `Teachers is deletted Successfully ${id}`,
     });
   } catch (error) {
     next(error);
@@ -74,46 +81,66 @@ export const deleteTeacher = async (req, res, next) => {
 export const updateteacher = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const update_data = req.body;
+    const { name, email, phone, position } = req.body;
 
-    // 1. Check teacher exists
-    const [teacher] = await db.execute("SELECT * FROM teachers WHERE id=?", [
+    // Check if teacher exists
+    const [existing] = await db.execute("SELECT * FROM teachers WHERE id = ?", [
       id,
     ]);
 
-    if (teacher.length === 0) {
-      return res.status(404).json({ message: "Teacher not found" });
+    if (existing.length === 0) {
+      return res.status(404).json({
+        message: `Teacher not found with id ${id}`,
+      });
     }
 
-    const oldteacher = teacher[0];
+    const teacher = existing[0];
 
-    // 2. If email changed → check duplicate (ignore current ID)
-    if (update_data.email && update_data.email !== oldteacher.email) {
-      const [emailteacher] = await db.execute(
-        "SELECT email FROM teachers WHERE email=? AND id != ?",
-        [update_data.email, id]
-      );
+    // Use existing values if not provided
+    const updatedName = name || teacher.name;
+    const updatedEmail = email || teacher.email;
+    const updatedPhone = phone || teacher.phone;
+    const updatedPosition = position || teacher.position;
 
-      if (emailteacher.length > 0) {
-        return res.status(400).json({ message: "Email already exists" });
+    let updatedImage = teacher.image;
+    if (req.file) {
+      updatedImage = `uploads/teachers/${req.file.filename}`;
+
+      if (teacher.image) {
+        removeimg(`uploads/teachers/${teacher.image.split("/").pop()}`);
       }
     }
 
-    // 3. Safe final data (undefined allowed NO)
-    const finaldata = {
-      name: update_data.name ?? oldteacher.name,
-      email: update_data.email ?? oldteacher.email,
-      phone: update_data.phone ?? oldteacher.phone,
-      position: update_data.position ?? oldteacher.position,
-    };
+    // Check if email already exists for another teacher
+    if (email && email !== teacher.email) {
+      const [emailCheck] = await db.execute(
+        "SELECT id FROM teachers WHERE email = ? AND id != ?",
+        [email, id]
+      );
 
-    // 4. Update SQL
+      if (emailCheck.length > 0) {
+        return res.status(409).json({
+          message: "Email already exists. Use another email.",
+        });
+      }
+    }
+
+    // Update teacher
     await db.execute(
-      "UPDATE teachers SET name=?, email=?, phone=?, position=? WHERE id=?",
-      [finaldata.name, finaldata.email, finaldata.phone, finaldata.position, id]
+      "UPDATE teachers SET name = ?, email = ?, phone = ?, position = ? ,image = ? WHERE id = ?",
+      [
+        updatedName,
+        updatedEmail,
+        updatedPhone,
+        updatedPosition,
+        updatedImage,
+        id,
+      ]
     );
 
-    res.status(200).json({ message: "Teacher updated successfully" });
+    return res.status(200).json({
+      message: "Teacher updated successfully",
+    });
   } catch (error) {
     next(error);
   }
