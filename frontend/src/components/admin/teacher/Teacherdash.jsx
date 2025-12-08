@@ -46,6 +46,7 @@ const Teacherdash = () => {
       email: teacher.email,
       position: teacher.position,
       phone: teacher.phone,
+      image: teacher.image,
     });
     setIsModalOpen(true);
   };
@@ -64,18 +65,36 @@ const Teacherdash = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // -----------------------
+    // ADDING NEW TEACHER
+    // -----------------------
     if (isAdding) {
-      // Adding a new teacher
+      const multerData = new FormData();
+      multerData.append("name", formData.name);
+      multerData.append("email", formData.email);
+      multerData.append("position", formData.position);
+      multerData.append("phone", formData.phone);
+
+      // Image file must be appended as a file
+      if (formData.image) {
+        multerData.append("image", formData.image);
+      }
+
       try {
-        const res = await addteacher(formData).unwrap();
+        const res = await addteacher(multerData).unwrap();
         toast.success(res.message || "Teacher added successfully");
         setIsModalOpen(false);
         setFormData(initialdata);
       } catch (error) {
-        toast.error(error.data?.message || "Failded to add");
+        toast.error(error?.data?.message || "Failed to add");
       }
       return;
     }
+
+    // -----------------------
+    // UPDATING TEACHER
+    // -----------------------
+
     // Find only changed fields
     const changes = {};
     for (const key in formData) {
@@ -84,18 +103,28 @@ const Teacherdash = () => {
       }
     }
 
-    // If no changes, stop here
+    // If no changes
     if (Object.keys(changes).length === 0) {
       toast.info("No changes to update");
       return;
     }
 
+    // If image updated, create FormData()
+    let sendData = changes;
+    if (changes.image) {
+      const updateData = new FormData();
+      Object.keys(changes).forEach((key) => {
+        updateData.append(key, changes[key]);
+      });
+      sendData = updateData; // send as multipart
+    }
+
     try {
       const res = await updateTeacher({
         id: teacherId,
-        data: changes,
+        data: sendData,
       }).unwrap();
-      console.log(res);
+
       toast.success(res.message || "Teacher updated successfully");
       setIsModalOpen(false);
     } catch (error) {
@@ -111,6 +140,13 @@ const Teacherdash = () => {
     setFormData(initialdata);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData((prev) => ({
+      ...prev,
+      image: file,
+    }));
+  };
   if (isLoading) {
     return <Loading isLoading={isLoading} />;
   }
@@ -176,6 +212,7 @@ const Teacherdash = () => {
                 <td className="px-6 py-4 text-sm text-gray-700">
                   {teacher.phone}
                 </td>
+
                 <td className="px-6 py-4 text-sm text-gray-700">
                   <div className="space-x-3">
                     <button
@@ -239,6 +276,24 @@ const Teacherdash = () => {
                 placeholder="Phone"
                 className="w-full p-2 border rounded mb-3"
                 onChange={handleChange}
+              />
+
+              {formData.image ? (
+                <img
+                  src={`${import.meta.env.VITE_IMG_URL}/${formData.image}`}
+                  alt={formData.name || "Teacher Image"}
+                  className="w-24 h-24 rounded-full object-cover mb-3"
+                />
+              ) : (
+                <div className="mb-3 text-gray-500">No image selected</div>
+              )}
+
+              <input
+                type="file"
+                id="image"
+                onChange={handleFileChange}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                required={isAdding}
               />
               <div className="flex justify-end space-x-2">
                 <button
