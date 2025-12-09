@@ -44,7 +44,7 @@ export const Dashboard = () => {
         </div>
 
         <div className="  flex flex-col mx-auto justify-center">
-          <p className="text-xl">Welcome:{email}</p>
+          <p className="text-xl">Welcome:{ email}</p>
 
           <button
             onClick={handleLogout}

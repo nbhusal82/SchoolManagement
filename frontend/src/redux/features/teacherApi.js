@@ -6,8 +6,8 @@ export const teacherApi = indexSlice.injectEndpoints({
     //Get All Teachers
     // query:get,post,update,delete (moutation)
     getAllTeacher: builder.query({
-      query: () => ({
-        url: "/teacher/get-teacher",
+      query: ({page,limit}) => ({
+        url: `/teacher/get-teacher?page=${page}&limit=${limit}`,
         method: "GET",
       }),
       providesTags: ["teacher"],

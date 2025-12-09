@@ -3,7 +3,13 @@ import db from "../config/dbconn.js";
 import { removeimg } from "../utils/removeimg.js";
 
 export const addteacher = async (req, res, next) => {
+  const { role } = req.user;
   try {
+    if (role !== "admin") {
+      return res.status(403).json({
+        message: " add only admin can add teacher",
+      });
+    }
     const { name, email, position, phone } = req.body;
     if (!name || !email || !position || !phone) {
       if (req.file) {
@@ -41,7 +47,7 @@ export const addteacher = async (req, res, next) => {
 };
 export const getteacher = async (req, res, next) => {
   try {
-    let { page = 1, limit = 2 } = req.query;
+    let { page = 1, limit = 10 } = req.query;
     page = Number(page);
     limit = Number(limit);
 
@@ -57,7 +63,8 @@ export const getteacher = async (req, res, next) => {
     );
     const totalCount = totalCountResult[0].count;
     const totalPages = Math.ceil(totalCount / limit);
-    const reaminingItems = totalCount - page * limit>0 ? totalCount - page * limit : 0;
+    const reaminingItems =
+      totalCount - page * limit > 0 ? totalCount - page * limit : 0;
     console.log(reaminingItems);
     res.status(200).json({
       message: "your data",

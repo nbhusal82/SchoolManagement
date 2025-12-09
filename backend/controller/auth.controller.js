@@ -53,6 +53,7 @@ export const login = async (req, res, next) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
       //2.Secret key
       process.env.Secret_key,

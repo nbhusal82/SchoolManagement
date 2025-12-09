@@ -8,6 +8,7 @@ import {
 } from "../../../redux/features/teacherApi";
 import { Loading } from "../../shared/loading";
 import { Error } from "../../shared/Error";
+import { Pagination } from "../../shared/Pagination";
 const initialdata = {
   name: "",
   email: "",
@@ -16,7 +17,11 @@ const initialdata = {
 };
 
 const Teacherdash = () => {
-  const { data, isLoading, error } = useGetAllTeacherQuery();
+  const [page, setPage] = useState(1);
+  const { data, isLoading, error } = useGetAllTeacherQuery({
+    page,
+    limit: 5,
+  });
 
   const teachers = data?.data;
   const [teacherId, setTeacherId] = useState();
@@ -27,6 +32,10 @@ const Teacherdash = () => {
   const [originalTeacher, setOriginalData] = useState({});
   const [formData, setFormData] = useState(initialdata);
   const [addteacher] = useAddteacherMutation();
+
+  // Number of items per page
+
+  const totalPages = data?.totalPages || 1;
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -233,6 +242,11 @@ const Teacherdash = () => {
             ))}
           </tbody>
         </table>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
 
         {teachers.length === 0 && (
           <p className="p-4 text-center text-gray-500">No teacher data found</p>
