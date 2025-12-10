@@ -9,6 +9,7 @@ import {
 import { Loading } from "../../shared/loading";
 import { Error } from "../../shared/Error";
 import { Pagination } from "../../shared/Pagination";
+import { useSelector } from "react-redux";
 const initialdata = {
   name: "",
   email: "",
@@ -17,6 +18,7 @@ const initialdata = {
 };
 
 const Teacherdash = () => {
+  const { role } = useSelector((state) => state.user);
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useGetAllTeacherQuery({
     page,
@@ -59,12 +61,12 @@ const Teacherdash = () => {
     });
     setIsModalOpen(true);
   };
-  const Handledelete = async (teacher) => {
+  const handledelete = async (teacher) => {
     setTeacherId(teacher.id);
     // console.log(teacher.id);
     // toast.error("hey");
     try {
-      await deleteTeacher(teacherId).unwrap(); // for use state
+      await deleteTeacher(teacher.id).unwrap(); // for use state
       //await deleteTeacher(teacher.id).unwrap(); // for  direct api call.
       toast.success("teacher deleted succesfully");
     } catch (error) {
@@ -223,20 +225,22 @@ const Teacherdash = () => {
                 </td>
 
                 <td className="px-6 py-4 text-sm text-gray-700">
-                  <div className="space-x-3">
-                    <button
-                      className=" bg-red-500 m-2 rounded-md cursor-pointer underline font-bold"
-                      onClick={() => Handledelete(teacher)}
-                    >
-                      Delete
-                    </button>
-                    <button
-                      className=" bg-green-600 m-2 rounded-md cursor-pointer underline"
-                      onClick={() => handleEdit(teacher)}
-                    >
-                      Edit
-                    </button>
-                  </div>
+                  {role !== "admin" && (
+                    <div className="space-x-3">
+                      <button
+                        className=" bg-red-500 m-2 rounded-md cursor-pointer underline font-bold"
+                        onClick={() => handledelete(teacher)}
+                      >
+                        Delete
+                      </button>
+                      <button
+                        className=" bg-green-600 m-2 rounded-md cursor-pointer underline"
+                        onClick={() => handleEdit(teacher)}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

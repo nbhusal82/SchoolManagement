@@ -1,15 +1,11 @@
 import db from "../config/dbconn.js";
-
 import { removeimg } from "../utils/removeimg.js";
+
+import { compressImg } from "../utils/sharphandler.js";
 
 export const addteacher = async (req, res, next) => {
   const { role } = req.user;
   try {
-    if (role !== "admin") {
-      return res.status(403).json({
-        message: " add only admin can add teacher",
-      });
-    }
     const { name, email, position, phone } = req.body;
     if (!name || !email || !position || !phone) {
       if (req.file) {
@@ -31,11 +27,16 @@ export const addteacher = async (req, res, next) => {
         message: "Email already exists .Use another eamil",
       });
     }
-    const image = req.file ? `uploads/teachers/${req.file.filename}` : null;
+    let imagePath = "";
+    if (req.file) {
+      const outputPath = `uploads/teachers/school-${req.file.filename}`;
+      await compressImg(req.file.path, outputPath);
+      imagePath = outputPath;
+    }
     // data halne database ma..filename
     await db.execute(
       "Insert into teachers(name,email,position,phone,image) values(?,?,?,?,?)",
-      [name, email, position, phone, image]
+      [name, email, position, phone, imagePath]
     );
 
     return res.status(201).json({
@@ -65,7 +66,7 @@ export const getteacher = async (req, res, next) => {
     const totalPages = Math.ceil(totalCount / limit);
     const reaminingItems =
       totalCount - page * limit > 0 ? totalCount - page * limit : 0;
-    console.log(reaminingItems);
+   
     res.status(200).json({
       message: "your data",
       data: allteacher,
@@ -84,7 +85,7 @@ export const getteacher = async (req, res, next) => {
 export const deleteTeacher = async (req, res, next) => {
   try {
     const { id } = req.params;
-    console.log(id);
+
     const [existing] = await db.execute(
       "select id,image from teachers where id=?",
       [id]
@@ -96,8 +97,8 @@ export const deleteTeacher = async (req, res, next) => {
     }
 
     // Delete image if exists
-    if (existing[0].img) {
-      removeImage(`uploads/teachers/${existing[0].img.split("/").pop()}`);
+    if (existing[0].image) {
+      removeimg(`uploads/teachers/${existing[0].image.split("/").pop()}`);
     }
 
     await db.execute("delete from teachers where id=?", [id]);
